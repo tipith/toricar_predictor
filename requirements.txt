@@ -1,0 +1,6 @@
+keras
+tensorflow
+flask
+flask_restful
+pandas
+scikit-learn

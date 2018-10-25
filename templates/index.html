@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+.slidecontainer {
+    width: 100%;
+}
+
+.space {
+    margin-bottom: 1.0em
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+</style>
+
+    <title>Tori.fi car price predictor!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Tori.fi car price predictor!</h1>
+
+    <div class="space">
+      <p>Year</p>
+      <input type="range" min="1970" max="2020" value="2010" step="1" class="slider" id="yslide">
+      <span id="year">2010</span>
+    </div>
+
+    <div class="space">
+      <p>Odometer</p>
+      <input type="range" min="0" max="500000" value="100000" step="1000" class="slider" id="oslide">
+      <span id="odo">2010</span>
+    </div>
+
+    <div class="dropdown space">
+      <button class="btn btn-primary dropdown-toggle" id="btn_brand" type="button" data-toggle="dropdown">audi
+      <span class="caret"></span></button>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+        <li><a href="#">audi</a></li>
+        <li><a href="#">bmw</a></li>
+        <li><a href="#">ford</a></li>
+        <li><a href="#">mercedes-benz</a></li>
+        <li><a href="#">nissan</a></li>
+        <li><a href="#">opel</a></li>
+        <li><a href="#">skoda</a></li>
+        <li><a href="#">toyota</a></li>
+        <li><a href="#">volkswagen</a></li>
+        <li><a href="#">volvo</a></li>
+      </ul>
+    </div>
+
+    <div class="dropdown space">
+      <button class="btn btn-primary dropdown-toggle" id="btn_fuel" type="button" data-toggle="dropdown">gasoline
+      <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="#">gasoline</a></li>
+        <li><a href="#">diesel</a></li>
+        <li><a href="#">unknown-f</a></li>
+      </ul>
+    </div>
+
+    <div class="dropdown space">
+      <button class="btn btn-primary dropdown-toggle" id="btn_gear" type="button" data-toggle="dropdown">automatic
+      <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="#">automatic</a></li>
+        <li><a href="#">manual</a></li>
+        <li><a href="#">unknown-g</a></li>
+      </ul>
+    </div>
+
+    <div class="space">
+      <p>Prediction</p>
+      <span id="prediction" style="font-size:large; font-weight:bold; color:green"></span>
+    </div>
+  </div>
+</body>
+
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function(){
+  var yslide = document.getElementById("yslide");
+  var oslide = document.getElementById("oslide");
+  var yval = document.getElementById("year");
+  var oval = document.getElementById("odo");
+  var predval = document.getElementById("prediction");
+
+  yval.innerHTML = yslide.value;
+  oval.innerHTML = oslide.value;
+
+  var brand = 'audi';
+  var year = 2010;
+  var odo = 100000;
+  var fuel = 'gasoline';
+  var gear = 'automatic';
+
+  function predict() {
+    $.ajax({
+      type: "POST",
+      url: "predict",
+      data: {
+        'brand': brand,
+        'year': year,
+        'odo': odo,
+        'fuel': fuel,
+        'gear': gear},
+      success: function(response)
+      {
+        predval.innerHTML = response.price_prediction + ' €';
+      }
+    });
+  }
+
+  $(".dropdown-menu li a").click(function(){
+    var btn = $(this).parents(".dropdown").find('.btn');
+    var selection = $(this).text();
+
+    btn.html(selection + ' <span class="caret"></span>');
+    btn.val($(this).data('value'));
+
+    if (btn[0].id == 'btn_brand')
+      brand = selection;
+    else if (btn[0].id == 'btn_fuel')
+      fuel = selection;
+    else if (btn[0].id == 'btn_gear')
+      gear = selection;
+
+    predict();
+  });
+
+  yslide.oninput = function() {
+    yval.innerHTML = this.value;
+    year = this.value;
+    predict();
+  }
+
+  oslide.oninput = function() {
+    oval.innerHTML = this.value;
+    odo = this.value;
+    predict();
+  }
+});
+</script>
+</html>
